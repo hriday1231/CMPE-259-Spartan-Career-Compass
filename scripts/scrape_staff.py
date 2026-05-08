@@ -1,14 +1,21 @@
+"""scrape Career Center staff from the staff and team directories"""
+
 import re
+import sqlite3
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-import psycopg2
 import requests
 from bs4 import BeautifulSoup
 
-from config import DATABASE_URL
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from config import DB_PATH
+
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 STAFF_URLS = [
     "https://careercenter.sjsu.edu/staff/",
@@ -16,6 +23,8 @@ STAFF_URLS = [
 ]
 USER_AGENT = "SpartanCareerCompass/1.0 (SJSU CMPE 259 project; educational)"
 
+# college keywords: any of these tokens appearing in a staff bio counts as
+# the named college, used to map a counselor onto the colleges they cover
 COLLEGE_KEYWORDS = {
     "Engineering": ["engineering", "engr", "coe"],
     "Business": ["business", "lucas", "cob"],
@@ -224,14 +233,15 @@ def scrape_staff(session: requests.Session) -> list[dict]:
 
 
 def load_staff_into_db(staff: list[dict]) -> int:
-    conn = psycopg2.connect(DATABASE_URL)
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(DB_PATH))
     cur = conn.cursor()
     cur.execute("DELETE FROM staff")
     for s in staff:
         cur.execute(
             """
             INSERT INTO staff (name, role, college, email, phone, office_location, office_hours, profile_url)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 s.get("name"),
@@ -260,7 +270,6 @@ def main():
         print(f"  {s['name']} | {(s.get('role') or '')[:40]} | {s.get('college') or ''} | {s.get('email') or ''}")
     if not staff:
         print("WARNING: No staff scraped. The page may be JavaScript-rendered.")
-        print("You may need to manually add staff data or use a browser-based scraper.")
         return
     n = load_staff_into_db(staff)
     print(f"Loaded {n} staff into database.")

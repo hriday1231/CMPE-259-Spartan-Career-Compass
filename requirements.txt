@@ -3,8 +3,6 @@ langchain-community>=0.3.0
 langchain-ollama>=0.2.0
 langgraph>=0.2.0
 
-psycopg2-binary>=2.9.9
-
 pypdf>=4.0.0
 pdfplumber>=0.11.0
 
@@ -14,3 +12,7 @@ beautifulsoup4>=4.12.0
 streamlit>=1.29.0
 
 python-dotenv>=1.0.0
+
+# kernel + Jupyter UI for opening Evaluation.ipynb and Spartan_Career_Compass.ipynb
+ipykernel>=6.29
+jupyter>=1.0

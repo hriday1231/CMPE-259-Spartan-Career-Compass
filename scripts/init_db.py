@@ -1,10 +1,11 @@
+"""apply schema.sql to the sqlite database"""
+
+import sqlite3
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-import psycopg2
-from config import DATABASE_URL, PROJECT_ROOT
+from config import DB_PATH, PROJECT_ROOT
 
 
 def main():
@@ -13,13 +14,14 @@ def main():
         print("schema.sql not found at", schema_path)
         sys.exit(1)
     sql = schema_path.read_text(encoding="utf-8")
-    conn = psycopg2.connect(DATABASE_URL)
-    conn.autocommit = True
-    cur = conn.cursor()
-    cur.execute(sql)
-    cur.close()
-    conn.close()
-    print("Schema applied successfully.")
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(DB_PATH))
+    try:
+        conn.executescript(sql)
+        conn.commit()
+    finally:
+        conn.close()
+    print(f"Schema applied successfully. DB: {DB_PATH}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,44 @@
+[
+  {
+    "query": "What career events are happening this week?",
+    "model": "mistral:7b",
+    "no_cache_ms": 3957,
+    "cached_hit_ms": 9,
+    "speedup_x": 439.7
+  },
+  {
+    "query": "Who is the counselor for engineering students?",
+    "model": "mistral:7b",
+    "no_cache_ms": 3813,
+    "cached_hit_ms": 8,
+    "speedup_x": 476.6
+  },
+  {
+    "query": "Summarize the Resume Guide into a checklist.",
+    "model": "mistral:7b",
+    "no_cache_ms": 1949,
+    "cached_hit_ms": 9,
+    "speedup_x": 216.6
+  },
+  {
+    "query": "When is the next headshots event?",
+    "model": "mistral:7b",
+    "no_cache_ms": 154,
+    "cached_hit_ms": 8,
+    "speedup_x": 19.2
+  },
+  {
+    "query": "What should I bring to a career fair?",
+    "model": "mistral:7b",
+    "no_cache_ms": 1386,
+    "cached_hit_ms": 9,
+    "speedup_x": 154.0
+  },
+  {
+    "query": "Find resume workshops in the next 7 days.",
+    "model": "mistral:7b",
+    "no_cache_ms": 1313,
+    "cached_hit_ms": 10,
+    "speedup_x": 131.3
+  }
+]

@@ -1,21 +1,21 @@
--- Spartan Career Compass - PostgreSQL schema
--- Run after creating database: createdb career_compass
+-- Spartan Career Compass - SQLite schema
+-- Applied by scripts/init_db.py to data/career_compass.db
 
 CREATE TABLE IF NOT EXISTS events (
-    event_id SERIAL PRIMARY KEY,
+    event_id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
-    start_datetime TIMESTAMPTZ,
-    end_datetime TIMESTAMPTZ,
+    start_datetime TEXT,  -- ISO 8601
+    end_datetime TEXT,    -- ISO 8601
     location TEXT,
     category TEXT,
     audience TEXT,
     description TEXT,
     source_url TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS guides (
-    guide_id SERIAL PRIMARY KEY,
+    guide_id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     section TEXT,
     chunk_id INTEGER NOT NULL,
@@ -23,12 +23,12 @@ CREATE TABLE IF NOT EXISTS guides (
     page_start INTEGER,
     page_end INTEGER,
     source_pdf TEXT NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (title, chunk_id)
 );
 
 CREATE TABLE IF NOT EXISTS staff (
-    staff_id SERIAL PRIMARY KEY,
+    staff_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     role TEXT,
     college TEXT,
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS staff (
     office_location TEXT,
     office_hours TEXT,
     profile_url TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS jobs_cache (
@@ -45,15 +45,15 @@ CREATE TABLE IF NOT EXISTS jobs_cache (
     title TEXT,
     company TEXT,
     location TEXT,
-    is_remote BOOLEAN,
+    is_remote INTEGER,
     min_pay NUMERIC,
     max_pay NUMERIC,
     currency TEXT,
     job_type TEXT,
     description TEXT,
     source_api TEXT,
-    api_raw JSONB,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    api_raw TEXT,  -- JSON serialized as TEXT
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Indexes for common queries

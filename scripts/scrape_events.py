@@ -1,21 +1,33 @@
+"""scrape upcoming events from careercenter.sjsu.edu/events/ and load them into sqlite"""
+
 import re
+import sqlite3
 import sys
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urljoin
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-import psycopg2
 import requests
 from bs4 import BeautifulSoup
 
-from config import DATABASE_URL
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from config import DB_PATH
+
+# windows console default codepage cannot encode emoji in event titles, so
+# force utf-8 stdout when this script runs as __main__
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 EVENTS_LIST_URL = "https://careercenter.sjsu.edu/events/"
 MAX_PAGES = 10
 USER_AGENT = "SpartanCareerCompass/1.0 (SJSU CMPE 259 project; educational)"
 
+# title-keyword rules used to map an event into one of the 5 site categories
+# (Career Fairs, Career Education, Employer Connection, Student Engagement,
+# Community), since the event detail pages do not always carry a category tag
 CATEGORY_RULES = [
     (r"\bcommunity\s*event\b", "Community Event"),
     (r"\b(skillsbuild|skills\s*build|experiential\s*learning|immersion)\b", "Career Education Events"),
@@ -35,7 +47,6 @@ CATEGORY_RULES = [
     (r"\b(drop[\s-]?in|walk[\s-]?in|no\s*appointment|career\s*help)\b", "Career Education Events"),
     (r"\b(elevate|ai\s*tools|skillsbuild|skills\s*build)\b", "Career Education Events"),
     (r"\b(hidden\s*job\s*market|labor\s*market|get\s*hired)\b", "Career Education Events"),
-    (r"\bexploring\s*careers\b", "Career Education Events"),
 ]
 
 
@@ -99,7 +110,7 @@ def _parse_event_date_location(link_text: str):
             r"^\w{3},?\s+\w{3}\s+\d{1,2}\s+from\s+\d{1,2}(?::\d{2})?\s*[ap]m\s*[-–]\s*\d{1,2}(?::\d{2})?\s*[ap]m\s*",
             "", location, flags=re.I
         ).strip()
-        location = re.sub(r"^[-–—]+\s*", "", location)
+        location = re.sub(r"^[-–-]+\s*", "", location)
         location = re.sub(r"\s*https?://.*$", "", location)
         if len(location) > 300:
             location = location[:300]
@@ -221,19 +232,22 @@ def scrape_single_event(session: requests.Session, url: str, list_link_text: str
 
 
 def load_events_into_db(events: list[dict]) -> int:
-    conn = psycopg2.connect(DATABASE_URL)
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(DB_PATH))
     cur = conn.cursor()
     cur.execute("DELETE FROM events")
     for e in events:
+        start_iso = e["start_datetime"].isoformat() if e.get("start_datetime") else None
+        end_iso = e["end_datetime"].isoformat() if e.get("end_datetime") else None
         cur.execute(
             """
             INSERT INTO events (title, start_datetime, end_datetime, location, category, audience, description, source_url)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 e["title"],
-                e["start_datetime"],
-                e["end_datetime"],
+                start_iso,
+                end_iso,
                 e["location"],
                 e["category"],
                 e.get("audience"),
@@ -258,7 +272,10 @@ def main():
             ev = scrape_single_event(session, url, link_text)
             if ev:
                 events.append(ev)
-                print(f"  [{ev['category']}] {ev['title'][:60]}")
+                # encode the print payload defensively to survive any console
+                # codepage that cannot represent emoji in event titles
+                line = f"  [{ev['category']}] {ev['title'][:60]}"
+                print(line.encode(sys.stdout.encoding or "utf-8", errors="replace").decode(sys.stdout.encoding or "utf-8", errors="replace"))
         except Exception as ex:
             print("  Skip", url[:60], ex)
     if not events:

@@ -1,9 +1,11 @@
+"""run staff and event scrapers back to back"""
+
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 from scrape_events import main as scrape_events_main
 from scrape_staff import main as scrape_staff_main
 
