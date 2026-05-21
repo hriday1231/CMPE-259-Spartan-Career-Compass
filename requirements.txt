@@ -13,6 +13,6 @@ streamlit>=1.29.0
 
 python-dotenv>=1.0.0
 
-# kernel + Jupyter UI for opening Evaluation.ipynb and Spartan_Career_Compass.ipynb
+# kernel + Jupyter UI for opening Evaluation.ipynb and Spartan_Career_Compass_Setup.ipynb
 ipykernel>=6.29
 jupyter>=1.0
