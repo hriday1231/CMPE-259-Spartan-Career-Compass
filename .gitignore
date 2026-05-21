@@ -15,6 +15,3 @@ results/_run_eval_log.txt
 
 # jupyter checkpoints
 .ipynb_checkpoints/
-
-# node deps for the docx-js report generator (regenerate via npm install)
-node_modules/

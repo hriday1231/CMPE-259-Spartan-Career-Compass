@@ -119,7 +119,7 @@ python scripts/run_eval.py --parts cache,compare,modes
 After that, open `Evaluation.ipynb` in Jupyter or VS Code with the venv
 kernel and Run All to refresh the rendered cells from the new JSONs.
 
-`Spartan_Career_Compass.ipynb` is the auto-setup Colab/Jupyter notebook
+`Spartan_Career_Compass_Setup.ipynb` is the auto-setup Colab/Jupyter notebook
 that walks a fresh evaluator from "no env" to "first answer" - install
 deps, init DB, scrape, and run a sample query. It works in Colab and
 in a local venv (Jupyter or VS Code).
@@ -164,7 +164,7 @@ Code/
       web_search_tool.py       web_search_tool (Brave + throttled)
   scripts/                     setup, scrape, eval drivers (see table above)
   Evaluation.ipynb             report-grade evaluation notebook
-  Spartan_Career_Compass.ipynb auto-setup notebook for graders
+  Spartan_Career_Compass_Setup.ipynb auto-setup notebook for graders
 ```
 
 ## Known limitations
